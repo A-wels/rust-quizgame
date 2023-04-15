@@ -1,0 +1,41 @@
+h1 {
+  text-align: center;
+}
+h2 {
+  text-align: center;
+}
+body {
+    background-color: lightblue;
+  }
+  .content {
+    max-width: 500px;
+    margin: auto;
+  }
+.login-main {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 15% auto;
+    width: 500px;
+    
+  }
+#answers {
+  /* center the answers in this row */
+  display: flex;
+  max-width: 50%;
+  margin: auto;
+  
+}
+  .btn-quiz {
+    margin: 10px 0px;
+    background-color: darkgray;
+    max-width: 40em;
+    
+  }
+  
+.btn-primary {
+  margin: 10px 0px;
+}
+
+

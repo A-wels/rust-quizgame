@@ -1,0 +1,8 @@
+question,answer1,answer2,answer3,answer4,correct_answer,round
+A B oder C,A ,B,C ,D,0,1
+Hallo?,J,D,H,O,1,1
+XD,XD,D,C ,D,0,2
+A B oder C,A ,B,C ,X,3,2
+A B oder C,A ,B,C ,D,2,3
+A B oder C,A ,B,C ,D,1,3
+"A B oder, C",A ,B,C ,D,0,3
