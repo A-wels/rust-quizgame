@@ -1,4 +1,10 @@
-const socket = new WebSocket('ws://localhost:8001/ws');
+var url = getHostIp();
+const socket = new WebSocket('ws://' + url + ':8001/ws');
+// close socket on page unload
+window.addEventListener("beforeunload", function (event) {
+  socket.close();
+});
+
 var session = document.cookie.split('; ')
 if( session[0] == ""){
     window.location.href = "login.html";

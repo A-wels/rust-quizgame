@@ -1,12 +1,20 @@
-const socket = new WebSocket("ws://localhost:8001/ws");
-var session = document.cookie
-  .split("; ")
+var url = getHostIp();
+const socket = new WebSocket('ws://' + url + ':8001/ws');
+// close socket on page unload
+window.addEventListener("beforeunload", function (event) {
+  socket.close();
+});
+
+var session = document.cookie;
+console.log(session)
+try {
+session =   session.split("; ")
   .find((row) => row.startsWith("session"))
   .split("=")[1];
-// if session is not set, redirect to login page
-if (session == undefined) {
+}catch (e) {
   window.location.href = "index.html";
 }
+
 var showingStats = false;
 
 socket.addEventListener("open", () => {
@@ -30,9 +38,9 @@ socket.addEventListener("message", (event) => {
 
 function toggleQuestionVisibility(visible) {
   if (visible == true) {
-    document.getElementById("answers").style.visibility = "visible";
+    document.getElementById("answers").style.display = "inline";
   } else {
-    document.getElementById("answers").style.visibility = "hidden";
+    document.getElementById("answers").style.display = "none";
   }
 }
 

@@ -9,6 +9,8 @@ use crate::structs::question::Round;
 use crate::structs::{nextphase::NextPhase, stats::Stats};
 use crate::util::stats::evaluate_answers;
 
+use super::generate_qr::generate_qr;
+
 impl MessageHandler {
     pub fn handle_end_of_game(websocket: &mut WebSocket<TcpStream>) {
         if websocket
@@ -238,6 +240,22 @@ impl MessageHandler {
             }
         }
 
+        return Ok(());
+    }
+
+    pub  fn handle_get_qr(websocket: &mut WebSocket<TcpStream>) -> Result<(), String>{
+        let qr = generate_qr();
+        // print "qr code requested"
+        println!("QR code requested");
+        // send the qr code to the client
+        if websocket
+            .write_message(Message::Text(qr))
+            .is_err()
+        {
+            // log to console
+            println!("Client disconnected");
+            return Err("Client disconnected".to_string());
+        }
         return Ok(());
     }
 }

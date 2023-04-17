@@ -1,6 +1,7 @@
 // import load_questions() from ./util/read_questions.rs
 mod structs;
 mod util;
+use local_ip_address::local_ip;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -10,8 +11,8 @@ use structs::player::Player;
 use structs::question::Round;
 use structs::stats::Stats;
 use tungstenite::accept;
-use util::read_questions;
-
+use util::{generate_qr, read_questions};
+use webbrowser;
 use crate::structs::message_handler::MessageHandler;
 
 fn main() {
@@ -19,9 +20,10 @@ fn main() {
     let config = structs::config::Config::new();
     let password = config.password;
     let question_file = config.question_file;
-
+    generate_qr::generate_qr();
     // Start websocket server
-    let server = TcpListener::bind("127.0.0.1:8001").unwrap();
+    let local_ip = local_ip().unwrap().to_string();
+    let server = TcpListener::bind(format!("{}:8001", local_ip)).unwrap();
 
     // Load questions and setup game data
     let rounds: Vec<Round> = read_questions::load_questions(question_file);
@@ -32,6 +34,14 @@ fn main() {
         session_id: "".to_string(),
     }));
     let stats: Arc<Mutex<Stats>> = Arc::new(Mutex::new(Stats::new(rounds[0].questions.clone())));
+
+    // open login.html in browser
+    if webbrowser::open(format!("http://{}:8000/login.html", local_ip).as_str()).is_ok() {
+        println!("{}", format!("Opened browser to: http://{}:8000/login.html", local_ip));
+    }else {
+        println!("Could not open browser");
+        println!("{}", format!("Please open http://{}:8000/login.html in your browser", local_ip));
+    }
 
     // Listen for incoming connections
     for stream in server.incoming() {

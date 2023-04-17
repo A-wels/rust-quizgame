@@ -1,3 +1,14 @@
+var session = document.cookie;
+try {
+  session = session
+    .split("; ")
+    .find((row) => row.startsWith("session"))
+    .split("=")[1];
+  window.location.href = "quiz.html";
+
+} catch (e) {
+}
+
 // get element with id name
 var nameBtn = document.getElementById('select-name');
 // function to create a hash of a string

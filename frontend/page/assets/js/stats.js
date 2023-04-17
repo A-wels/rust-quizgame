@@ -5,6 +5,10 @@ socket.addEventListener("message", (event) => {
         displayStats();
     }
 });
+// close socket on page unload
+window.addEventListener("beforeunload", function (event) {
+  socket.close();
+});
 
 
 function displayStats() {
@@ -20,12 +24,14 @@ function displayStats() {
 
   // append child to div with id "results"
   var results = document.getElementById("results");
+
   for (var i = 0; i < stats.questions.length; i++) {
     var d = document.createElement("canvas");
     d.id = "result" + i;
     d.style = "margin-bottom: 20px;";
     results.appendChild(d);
     const ctx = document.getElementById(d.id);
+    var sumOfAnswers = stats.answers.answers[i].reduce((x,y) => x+y, 0)
 
     var bgcolors = ["#ff0000", "#ff0000", "#ff0000", "#ff0000"]
     bgcolors[stats.questions[i].correct_answer] = "#00ff00"
@@ -51,6 +57,7 @@ function displayStats() {
         indexAxis: "y",
         scales: {
           x: {
+            max: sumOfAnswers,
             ticks: {
               stepSize: 1,
             },
@@ -63,7 +70,10 @@ function displayStats() {
           title: {
             display: true,
             text: stats.questions[i].question,
-          }
+            font: {
+              size: 18,
+            }
+        }
         },
       },
     });

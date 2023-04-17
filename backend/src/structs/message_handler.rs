@@ -101,6 +101,10 @@ impl MessageHandler {
             // send the phase to the client
             let result = MessageHandler::handle_get_phase(&mut websocket, &next_phase);
             return result;
+        }else if msg=="getQR".to_string() {
+            // send the qr code to the client
+            let result = MessageHandler::handle_get_qr(&mut websocket);
+            return result;
         }
         return Ok(());
     }
