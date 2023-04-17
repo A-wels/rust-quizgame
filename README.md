@@ -12,3 +12,5 @@ Players can select a username to play with. They then answer multiple rounds of 
 
 Navigate to {localip}/index.html on the user clients and to {localip}/login.html on the admin device.
 
+## Warning
+Only host this on a local network with devices you trust. There was **no** emphasis on securing communication, since this is meant for the use in a group with kids.
