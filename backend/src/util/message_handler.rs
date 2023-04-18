@@ -118,6 +118,12 @@ impl MessageHandler {
             } else {
                 // end the game
                 *next_phase_mut = NextPhase::End;
+                if websocket.write_message(Message::Text("endOfGame".to_string())).is_err()
+                {
+                     // log to console
+                     println!("Client disconnected");
+                     return Err("Client disconnected".to_string());
+                }
             }
             if *next_phase_mut == NextPhase::Question {
                 *next_phase_mut = NextPhase::Stats;

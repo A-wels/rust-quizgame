@@ -9,7 +9,7 @@ struct Asset;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Starting local webserver")
+    println!("Starting local webserver");
     HttpServer::new(|| {
         App::new().service(
             Embed::new("", &Asset)

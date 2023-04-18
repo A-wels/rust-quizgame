@@ -19,6 +19,9 @@ socket.addEventListener("message", (event) => {
         stats = JSON.parse(event.data);
         displayStats();
     }
+    if (event.data === "endOfGame"){
+      endGame();
+    }
 });
 
 var nextPhaseIsStats = true;
@@ -41,6 +44,13 @@ document.getElementById("btn-next").addEventListener("click", function(){
         }
 })
 
+function endGame(){
+  var btn = document.getElementById("btn-next")
+  btn.remove()
+  var endMessage = document.getElementById("card-end")
+  endMessage.style.display = "flex"
+
+}
 
 function displayStats() {
     showingStats = true;
