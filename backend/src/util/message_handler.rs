@@ -229,7 +229,7 @@ impl MessageHandler {
                 }
                 // send the next question to the client
             } else {
-                // send the question to the client and check if the client is still connected, remove the correct answer from the question
+                // send the question to the client and check if the client is still connected
                 if websocket
                     .write_message(Message::Text(
                         serde_json::to_string(

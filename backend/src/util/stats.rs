@@ -10,7 +10,10 @@ pub fn evaluate_answers(players: &Vec<Player>, round: &Round) -> Stats {
             let mut index: usize = 0;
             for answer in &player.current_answers{
                 // count answer
-                    stats.answers.answers[index][*answer] += 1;
+                    if *answer <5{
+                        stats.answers.answers[index][*answer] += 1;
+                    }
+                    
                 index +=1
             }
         }
