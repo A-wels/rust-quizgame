@@ -6,16 +6,18 @@ window.addEventListener("beforeunload", function (event) {
 });
 
 var session = document.cookie;
+var answerTimer = 0
+
 console.log(session)
 try {
-session =   session.split("; ")
-  .find((row) => row.startsWith("session"))
-  .split("=")[1];
-}catch (e) {
+  session = session.split("; ")
+    .find((row) => row.startsWith("session"))
+    .split("=")[1];
+} catch (e) {
   window.location.href = "index.html";
 }
 
-var showingStats = false;
+var showingStats = false
 
 socket.addEventListener("open", () => {
   socket.send("register|" + session);
@@ -39,8 +41,13 @@ socket.addEventListener("message", (event) => {
 function toggleQuestionVisibility(visible) {
   if (visible == true) {
     document.getElementById("answers").style.display = "inline";
+    document.getElementById("progress").style.display = "flex"
+
   } else {
     document.getElementById("answers").style.display = "none";
+    document.getElementById("progress").style.display = "none"
+    document.getElementById("progress-bar").style.width = "100%"
+
   }
 }
 
@@ -66,19 +73,43 @@ function displayQuestion() {
   document.getElementById("answer2").innerHTML = quiz.answer2;
   document.getElementById("answer3").innerHTML = quiz.answer3;
   document.getElementById("answer4").innerHTML = quiz.answer4;
+
+  // start the timer
+  startTimer()
+}
+
+function startTimer() {
+  // start timer for div progress-bar that increases aria-valuenow from 0 to 100
+  var timeleft = 20;
+  answerTimer = setInterval(function () {
+    if (timeleft < 0) {
+      sendAnswer(5);
+    }
+    timeleft -= 1;
+    var widthPercentage = ((timeleft / 20) * 100).toString() + "%"
+    document.getElementById("progress-bar").style.width = widthPercentage
+    console.log(timeleft / 20.)
+    console.log("timeleft: " + timeleft)
+    console.log("widthPercentage: " + widthPercentage)
+    console.log()
+
+
+  }, 1000)
 }
 
 function sendAnswer(answer) {
+  document.getElementById("progress-bar").style.width = "100%"
   // send answer to backend
   // log answer
   socket.send("answer|" + answer + "|" + session);
   socket.send("getQuestion|" + session);
-  displayQuestion();
+  clearInterval(answerTimer);
 }
+
 let updateInterval = 0;
 function endOfRound() {
   document.getElementById("question").innerHTML =
-    "Du hast alle Fragen der Runde beantwortet! Bitte warte auf die nächste Runde.";
+    "Bitte warte auf die nächste Runde.";
   // make answers invisible
   toggleQuestionVisibility(false);
   updateInterval = setInterval(function () {
@@ -101,6 +132,7 @@ function endGame() {
   while (results.firstChild) {
     results.removeChild(results.firstChild);
   }
+  clearInterval(answerTimer)
 }
 function requestStats() {
   // send request to backend

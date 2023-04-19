@@ -1,9 +1,9 @@
 var stats = []
 socket.addEventListener("message", (event) => {
-    if (event.data.startsWith('{"questions"')) {
-        stats = JSON.parse(event.data);
-        displayStats();
-    }
+  if (event.data.startsWith('{"questions"')) {
+    stats = JSON.parse(event.data);
+    displayStats();
+  }
 });
 // close socket on page unload
 window.addEventListener("beforeunload", function (event) {
@@ -31,18 +31,17 @@ function displayStats() {
     d.style = "margin-bottom: 20px;";
     results.appendChild(d);
     const ctx = document.getElementById(d.id);
-    var sumOfAnswers = stats.answers.answers[i].reduce((x,y) => x+y, 0)
-
+    var sumOfAnswers = stats.answers.answers[i].reduce((x, y) => x + y, 0)
     var bgcolors = ["#ff0000", "#ff0000", "#ff0000", "#ff0000"]
     bgcolors[stats.questions[i].correct_answer] = "#00ff00"
     new Chart(ctx, {
       type: "bar",
       data: {
         labels: [
-          stats.questions[i].answer1,
-          stats.questions[i].answer2,
-          stats.questions[i].answer3,
-          stats.questions[i].answer4,
+          split_long_labels(stats.questions[i].answer1),
+          split_long_labels(stats.questions[i].answer2),
+          split_long_labels(stats.questions[i].answer3),
+          split_long_labels(stats.questions[i].answer4),
         ],
         datasets: [
           {
@@ -73,9 +72,29 @@ function displayStats() {
             font: {
               size: 18,
             }
-        }
+          }
         },
       },
     });
   }
+}
+
+function split_long_labels(label) {
+  let words = label.split(" ")
+  let result = []
+  let currentLine = ""
+  let max_length = 40
+
+  for (let i = 0; i < words.length; i++) {
+    if (currentLine.length + words[i].length <= max_length) {
+      currentLine += words[i] + " "
+    } else {
+      result.push(currentLine.trim())
+      currentLine = words[i] + " "
+    }
+  }
+  if (currentLine.trim().length > 0) {
+    result.push(currentLine.trim());
+  }
+  return result
 }
