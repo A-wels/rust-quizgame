@@ -11,7 +11,7 @@ use structs::player::Player;
 use structs::question::Round;
 use structs::stats::Stats;
 use tungstenite::accept;
-use util::{generate_qr, read_questions};
+use util::{read_questions};
 use webbrowser;
 use crate::structs::message_handler::MessageHandler;
 
@@ -20,7 +20,7 @@ fn main() {
     let config = structs::config::Config::new();
     let password = config.password;
     let question_file = config.question_file;
-    generate_qr::generate_qr();
+
     // Start websocket server
     let local_ip = local_ip().unwrap().to_string();
     let server = TcpListener::bind(format!("{}:8001", local_ip)).unwrap();
@@ -34,13 +34,14 @@ fn main() {
         session_id: "".to_string(),
     }));
     let stats: Arc<Mutex<Stats>> = Arc::new(Mutex::new(Stats::new(rounds[0].questions.clone())));
+    let game_id = util::auth::generate_game_id();
 
     // open login.html in browser
-    if webbrowser::open(format!("http://{}:8000/login.html", local_ip).as_str()).is_ok() {
-        println!("{}", format!("Opened browser to: http://{}:8000/login.html", local_ip));
+    if webbrowser::open(format!("http://{}:8000/login", local_ip).as_str()).is_ok() {
+        println!("{}", format!("Opened browser to: http://{}:8000/login", local_ip));
     }else {
         println!("Could not open browser");
-        println!("{}", format!("Please open http://{}:8000/login.html in your browser", local_ip));
+        println!("{}", format!("Please open http://{}:8000/login in your browser", local_ip));
     }
 
     // Listen for incoming connections
@@ -53,6 +54,7 @@ fn main() {
         let admin_session = admin_session.clone();
         let next_phase = next_phase.clone();
         let stats = stats.clone();
+        let game_id = game_id.clone();
 
         // Start a new thread for each connection
         thread::spawn(move || {
@@ -73,7 +75,7 @@ fn main() {
                     // log to console
                     println!("Received: {}", msg.to_text().unwrap());
                     let msg = msg.to_text().unwrap();
-                    // check if the message starts with register| and if the client is not already registered
+                    // check if the message starts with register| and and game id is correct
                     let result = MessageHandler::handle_message(
                         &mut websocket,
                         msg,
@@ -84,6 +86,7 @@ fn main() {
                         &current_round,
                         &rounds,
                         &stats,
+                        &game_id
                     );
                     if result.is_err() {
                         // log to console

@@ -1,22 +1,23 @@
-use actix_web::{App, HttpServer};
-use rust_embed::RustEmbed;
-use actix_embed::Embed;
-
-
-#[derive(RustEmbed)]
-#[folder = "page/"]
-struct Asset;
+use actix_files::Files;
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Result};
+use std::fs;
+mod routes;
+use local_ip_address::local_ip;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Starting local webserver");
+    let local_ip = local_ip().unwrap().to_string();
+
     HttpServer::new(|| {
-        App::new().service(
-            Embed::new("", &Asset)
-                .index_file("index.html")
-        )
+        App::new()
+            .service(web::resource("/").to(routes::index::index))
+            .service(Files::new("/assets", "./static/assets"))
+            .service(web::resource("/admin").to(routes::admin::admin))
+            .service(web::resource("/login").to(routes::login::login))
+            .service(web::resource("/qr").to(routes::qr::qr))
+            .service(web::resource("/quiz").to(routes::quiz::quiz))
     })
-    .bind("0.0.0.0:8000")?
+    .bind(format!("{}:8000", local_ip))?
     .run()
     .await
 }

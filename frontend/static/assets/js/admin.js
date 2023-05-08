@@ -7,14 +7,14 @@ window.addEventListener("beforeunload", function (event) {
 
 var session = document.cookie.split('; ')
 if (session[0] == "") {
-  window.location.href = "login.html";
+  window.location.href = "login";
 }
 else {
   session = session[0].split('=')[1];
 }
 
 socket.addEventListener("open", () => {
-  socket.send("getPhase");
+  socket.send("getPhase|session=" + session)
 });
 
 var stats = []
@@ -35,7 +35,7 @@ function handlePhaseLoad(phase) {
     nextPhaseIsStats = true
   } else if (phase == "Stats") {
     nextPhaseIsStats = false
-    socket.send("getStats|" + session);
+    socket.send("getStats|session=" + session);
     document.getElementById("btn-next").innerHTML = "Nächste Runde";
     
   }
@@ -44,9 +44,9 @@ function handlePhaseLoad(phase) {
 var nextPhaseIsStats = true;
 // onclick handler for btn-next
 document.getElementById("btn-next").addEventListener("click", function () {
-  socket.send("next|" + session);
+  socket.send("next|session=" + session);
   if (nextPhaseIsStats) {
-    socket.send("getStats|" + session);
+    socket.send("getStats|session=" + session);
     nextPhaseIsStats = false;
     // set text of btn-next to "next"
     document.getElementById("btn-next").innerHTML = "Nächste Runde";

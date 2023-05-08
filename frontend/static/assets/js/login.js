@@ -10,7 +10,7 @@ socket.addEventListener("message", (event) => {
   if (event.data.startsWith("loginSuccess|")) {
     session = event.data.split("|")[1];
     document.cookie = "session=" + session;
-    window.location.href = "qr.html";
+    window.location.href = "qr";
   } else if (event.data.startsWith("loginFailed")) {
     // create and append error message to div error if it does not exist
     if (document.getElementById("error") == null) {

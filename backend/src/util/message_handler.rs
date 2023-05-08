@@ -7,6 +7,7 @@ use crate::structs::message_handler::MessageHandler;
 use crate::structs::player::Player;
 use crate::structs::question::Round;
 use crate::structs::{nextphase::NextPhase, stats::Stats};
+use crate::util::auth::generate_session_key;
 use crate::util::stats::evaluate_answers;
 
 use super::generate_qr::generate_qr;
@@ -68,19 +69,19 @@ impl MessageHandler {
 
     pub fn handle_next(
         websocket: &mut WebSocket<TcpStream>,
-        msg: &str,
         next_phase: &Arc<Mutex<NextPhase>>,
         admin_session: &Arc<Mutex<AdminSession>>,
         players: &Arc<Mutex<Vec<Player>>>,
         current_round: &Arc<Mutex<usize>>,
         rounds: &Vec<Round>,
         stats: &Arc<Mutex<Stats>>,
+        session_id: &String,
     ) -> Result<(), String> {
         // change to next phase
         let mut next_phase_mut = next_phase.lock().unwrap();
 
         // check if the admin session id is correct
-        if msg[5..] == admin_session.lock().unwrap().session_id {
+        if session_id.clone() == admin_session.lock().unwrap().session_id {
             // log to console
             println!("Admin requested next round");
             // check if there is a next round
@@ -118,11 +119,13 @@ impl MessageHandler {
             } else {
                 // end the game
                 *next_phase_mut = NextPhase::End;
-                if websocket.write_message(Message::Text("endOfGame".to_string())).is_err()
+                if websocket
+                    .write_message(Message::Text("endOfGame".to_string()))
+                    .is_err()
                 {
-                     // log to console
-                     println!("Client disconnected");
-                     return Err("Client disconnected".to_string());
+                    // log to console
+                    println!("Client disconnected");
+                    return Err("Client disconnected".to_string());
                 }
             }
             if *next_phase_mut == NextPhase::Question {
@@ -144,10 +147,7 @@ impl MessageHandler {
             // log to console
             println!("Admin logged in");
             // set the admin session id to hash of  admin + the current time
-            admin_session.lock().unwrap().session_id = format!(
-                "{:x}",
-                md5::compute(format!("admin{}", chrono::Utc::now().timestamp()))
-            );
+            admin_session.lock().unwrap().session_id = generate_session_key();
             // send the message to client: loginSucess|session_id
             if websocket
                 .write_message(Message::Text(format!(
@@ -174,94 +174,132 @@ impl MessageHandler {
         return Ok(());
     }
 
-    pub fn handle_add_player(msg: &str, players: &Arc<Mutex<Vec<Player>>>) {
-        // create a new player
-        let player = Player::new(msg[9..].to_string());
-        println!("Added new player with session_id: {}", player.session_id);
-
-        players.lock().unwrap().push(player);
-    }
-
-    pub fn handle_get_question(
+    pub fn handle_add_player(
         websocket: &mut WebSocket<TcpStream>,
         players: &Arc<Mutex<Vec<Player>>>,
-        msg: &str,
-        current_round: &Arc<Mutex<usize>>,
-        rounds: &Vec<Round>,
+        game_id: &str,
+        valid_id: &str,
     ) -> Result<(), String> {
-        // find the player with the session_id
-        let player_opt = players.lock().unwrap();
-        let player = player_opt
-            .iter()
-            .find(|&p| p.session_id == msg[12..].to_string());
-        // check if the player exists
-        if player.is_some() {
-            let player = player.unwrap();
-            //log to console
-            println!(
-                "Sending question to player with session_id: {}",
-                player.session_id
-            );
-
-            // check if the player has answered all questions of the current round
-            let current_round_value = current_round.lock().unwrap();
-
-            if player.current_question == rounds[*current_round_value].questions.len() {
-                // send the end of round message to the client
-                if websocket
-                    .write_message(Message::Text("endOfRound".to_string()))
-                    .is_err()
-                {
-                    // log to console
-                    println!("Client disconnected");
-                    return Err("Client disconnected".to_string());
-                }
-                // check if the player has answered all questions of the game
-            } else if player.current_question == rounds.len() {
-                // send the end of game message to the client
-                if websocket
-                    .write_message(Message::Text("endOfGame".to_string()))
-                    .is_err()
-                {
-                    // log to console
-                    println!("Client disconnected");
-                    return Err("Client disconnected".to_string());
-                }
-                // send the next question to the client
-            } else {
-                // send the question to the client and check if the client is still connected
-                if websocket
-                    .write_message(Message::Text(
-                        serde_json::to_string(
-                            &rounds[*current_round_value].questions[player.current_question],
-                        )
-                        .unwrap(),
-                    ))
-                    .is_err()
-                {
-                    // log to console
-                    println!("Client disconnected");
-                    return Err("Client disconnected".to_string());
-                }
+        println!("Game id: {}", game_id);
+        println!("Valid id: {}", valid_id);
+        if !(game_id == valid_id) {
+            if websocket
+                .write_message(Message::Text("invalidGameID".to_string()))
+                .is_err()
+            {
+                // log to console
+                println!("Client disconnected");
+                return Err("Client disconnected".to_string());
             }
+            return Ok(());
         }
-
-        return Ok(());
-    }
-
-    pub  fn handle_get_qr(websocket: &mut WebSocket<TcpStream>) -> Result<(), String>{
-        let qr = generate_qr();
-        // print "qr code requested"
-        println!("QR code requested");
-        // send the qr code to the client
+        // create a new player
+        let session_id = generate_session_key();
+        let player = Player::new(session_id);
+        // send the message to client: addPlayerSuccess|session_id
         if websocket
-            .write_message(Message::Text(qr))
+            .write_message(Message::Text(format!(
+                "addPlayerSuccess|{}",
+                player.session_id
+            )))
             .is_err()
         {
             // log to console
             println!("Client disconnected");
             return Err("Client disconnected".to_string());
         }
+        println!("Added new player with session_id: {}", player.session_id);
+
+        players.lock().unwrap().push(player);
+        return Ok(());
+    }
+
+    pub fn handle_get_question(
+        websocket: &mut WebSocket<TcpStream>,
+        players: &Arc<Mutex<Vec<Player>>>,
+        session_id: &String,
+        current_round: &Arc<Mutex<usize>>,
+        rounds: &Vec<Round>,
+    ) -> Result<(), String> {
+        // get the player
+        let mut player = players.lock().unwrap();
+        let player = player
+            .iter_mut()
+            .find(|p| p.session_id == *session_id)
+            .unwrap();
+        println!("Player {} requested question", player.session_id);
+
+        // check if the player has answered all questions of the current round
+        let current_round_value = current_round.lock().unwrap();
+
+        if player.current_question == rounds[*current_round_value].questions.len() {
+            // send the end of round message to the client
+            if websocket
+                .write_message(Message::Text("endOfRound".to_string()))
+                .is_err()
+            {
+                // log to console
+                println!("Client disconnected");
+                return Err("Client disconnected".to_string());
+            }
+            // check if the player has answered all questions of the game
+        } else if player.current_question == rounds.len() {
+            // send the end of game message to the client
+            if websocket
+                .write_message(Message::Text("endOfGame".to_string()))
+                .is_err()
+            {
+                // log to console
+                println!("Client disconnected");
+                return Err("Client disconnected".to_string());
+            }
+            // send the next question to the client
+        } else {
+            // send the question to the client and check if the client is still connected
+            if websocket
+                .write_message(Message::Text(
+                    serde_json::to_string(
+                        &rounds[*current_round_value].questions[player.current_question],
+                    )
+                    .unwrap(),
+                ))
+                .is_err()
+            {
+                // log to console
+                println!("Client disconnected");
+                return Err("Client disconnected".to_string());
+            }
+        }
+
+        return Ok(());
+    }
+
+    pub fn handle_get_qr(
+        websocket: &mut WebSocket<TcpStream>,
+        game_id: &String,
+    ) -> Result<(), String> {
+        let qr = generate_qr(game_id);
+
+        // print "qr code requested"
+        println!("QR code requested");
+
+        // send the qr code to the client
+        if websocket.write_message(Message::Text(qr)).is_err() {
+            // log to console
+            println!("Client disconnected");
+            return Err("Client disconnected".to_string());
+        }
+
+        // send game id to client
+        if websocket
+            .write_message(Message::Text("gameID|ID: ".to_string() + game_id))
+            .is_err()
+        {
+            // log to console
+            println!("Client disconnected");
+            return Err("Client disconnected".to_string());
+        }
+
         return Ok(());
     }
 }

@@ -8,20 +8,17 @@ window.addEventListener("beforeunload", function (event) {
 var session = document.cookie;
 var answerTimer = 0
 
-console.log(session)
 try {
-  session = session.split("; ")
-    .find((row) => row.startsWith("session"))
-    .split("=")[1];
+  session = session.split("session=")[1];
 } catch (e) {
-  window.location.href = "index.html";
+  window.location.href = "/";
 }
 
 var showingStats = false
 
 socket.addEventListener("open", () => {
-  socket.send("register|" + session);
-  socket.send("getPhase");
+ // socket.send("register|" + session);
+  socket.send("getPhase|session=" + session)
 });
 var quiz = [];
 var stats = [];
@@ -101,8 +98,8 @@ function sendAnswer(answer) {
   document.getElementById("progress-bar").style.width = "100%"
   // send answer to backend
   // log answer
-  socket.send("answer|" + answer + "|" + session);
-  socket.send("getQuestion|" + session);
+  socket.send("answer|" + answer + "|session=" + session);
+  socket.send("getQuestion|session=" + session);
   clearInterval(answerTimer);
 }
 
@@ -118,7 +115,7 @@ function endOfRound() {
 }
 
 function getQuestion() {
-  socket.send("getQuestion|" + session);
+  socket.send("getQuestion|session=" + session);
 }
 
 function endGame() {
@@ -136,7 +133,7 @@ function endGame() {
 }
 function requestStats() {
   // send request to backend
-  socket.send("getStats|" + session);
+  socket.send("getStats|session=" + session);
 }
 
 // add event listeners to the buttons
