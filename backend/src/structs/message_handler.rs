@@ -53,7 +53,6 @@ impl MessageHandler {
                 }
                 return Err("Invalid session id".to_string());
             }
-            println!("Valid session id");
 
             if msg.starts_with("getQuestion|") && *next_phase.lock().unwrap() == NextPhase::Stats {
                 let result = MessageHandler::handle_get_question(

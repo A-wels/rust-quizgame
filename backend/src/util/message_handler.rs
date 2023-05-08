@@ -180,8 +180,6 @@ impl MessageHandler {
         game_id: &str,
         valid_id: &str,
     ) -> Result<(), String> {
-        println!("Game id: {}", game_id);
-        println!("Valid id: {}", valid_id);
         if !(game_id == valid_id) {
             if websocket
                 .write_message(Message::Text("invalidGameID".to_string()))
