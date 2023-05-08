@@ -1,6 +1,5 @@
 use actix_files::Files;
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Result};
-use std::fs;
+use actix_web::{web, App, HttpServer};
 mod routes;
 use local_ip_address::local_ip;
 

@@ -1,5 +1,4 @@
-use actix_files::Files;
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Result};
+use actix_web::{HttpRequest, HttpResponse, Result};
 use std::fs;
 
 // load static files from /static/index.html
