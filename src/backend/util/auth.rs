@@ -3,7 +3,7 @@ use std::sync::Arc;
 use mutex::Mutex;
 use rand::{ prelude::*};
 
-use crate::structs::{
+use crate::backend::structs::{
     adminsessions::AdminSession,
     player::{Player},
 };

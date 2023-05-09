@@ -2,7 +2,7 @@ use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 use tungstenite::{Message, WebSocket};
 
-use crate::util::auth::validate_session;
+use crate::backend::util::auth::validate_session;
 
 use super::adminsessions::AdminSession;
 use super::nextphase::NextPhase;

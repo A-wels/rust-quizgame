@@ -8,7 +8,7 @@ use std::fs::File;
 use csv::ReaderBuilder;
 
 // load struct for questions from /structs/question.rs
-use crate::structs::question::{Question, Round};
+use crate::backend::structs::question::{Question, Round};
 
 // Read questions from questions.csv:
 // First row contains table headers

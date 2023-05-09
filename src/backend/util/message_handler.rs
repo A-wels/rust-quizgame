@@ -2,13 +2,13 @@ use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 use tungstenite::{Message, WebSocket};
 
-use crate::structs::adminsessions::AdminSession;
-use crate::structs::message_handler::MessageHandler;
-use crate::structs::player::Player;
-use crate::structs::question::Round;
-use crate::structs::{nextphase::NextPhase, stats::Stats};
-use crate::util::auth::generate_session_key;
-use crate::util::stats::evaluate_answers;
+use crate::backend::structs::adminsessions::AdminSession;
+use crate::backend::structs::message_handler::MessageHandler;
+use crate::backend::structs::player::Player;
+use crate::backend::structs::question::Round;
+use crate::backend::structs::{nextphase::NextPhase, stats::Stats};
+use crate::backend::util::auth::generate_session_key;
+use crate::backend::util::stats::evaluate_answers;
 
 use super::generate_qr::generate_qr;
 

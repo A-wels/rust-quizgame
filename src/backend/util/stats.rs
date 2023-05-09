@@ -1,4 +1,4 @@
-use crate::structs::{question::Round, player::Player, stats::Stats};
+use crate::backend::structs::{question::Round, player::Player, stats::Stats};
 
 // function to elavuate all answers
 pub fn evaluate_answers(players: &Vec<Player>, round: &Round) -> Stats {

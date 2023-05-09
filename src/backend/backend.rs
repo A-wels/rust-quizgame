@@ -1,6 +1,6 @@
 // import load_questions() from ./util/read_questions.rs
-mod structs;
-mod util;
+use crate::backend::structs;
+use crate::backend::util;
 use local_ip_address::local_ip;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
@@ -13,9 +13,9 @@ use structs::stats::Stats;
 use tungstenite::accept;
 use util::{read_questions};
 use webbrowser;
-use crate::structs::message_handler::MessageHandler;
+use crate::backend::structs::message_handler::MessageHandler;
 
-fn main() {
+pub fn start() {
     // Read config
     let config = structs::config::Config::new();
     let password = config.password;
