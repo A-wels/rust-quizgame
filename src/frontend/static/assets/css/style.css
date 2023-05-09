@@ -1,0 +1,55 @@
+h1 {
+  text-align: center;
+  font-size: 24px;
+}
+h2 {
+  text-align: center;
+}
+body {
+    background-color: lightblue;
+  }
+  .content {
+    max-width: 500px;
+    margin: auto;
+    padding: 10px;
+  }
+.login-main {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 10%;
+    width: 80%;
+    
+  }
+
+  .btn-quiz {
+    margin: 10px 0px;
+    background-color: darkgray;
+    max-width: 40em;
+    
+  }
+  
+.btn-primary {
+  margin: 10px 0px;
+}
+
+#qr {
+  /* center the content of the div */
+  display: flex;
+  justify-content: center;
+  
+}
+
+/* make div with id resulst smaller on big screens */
+#results {
+  max-width: 40em;
+  display: block;
+  margin: auto;
+}
+
+#gameID {
+  margin-top: 10px;
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
