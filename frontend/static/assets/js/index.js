@@ -22,35 +22,48 @@ window.addEventListener("beforeunload", function (event) {
 
 socket.addEventListener("message", (event) => {
   console.log(event.data)
-  if (event.data.startsWith('addPlayerSuccess|')) {  
+  if (event.data.startsWith('addPlayerSuccess|')) {
     var session = event.data.split("|")[1];
     document.cookie = "session=" + session;
     // Redirect to quiz.html
     console.log("REdirected")
 
     window.location.href = "quiz";
-  } else if(event.data.startsWith("invalidGameID")){
+  } else if (event.data.startsWith("invalidGameID")) {
     alert("Falsche Spiel ID")
     document.getElementById('gameid').value = ""
   }
 })
 
 
-
+window.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    nameBtn.click();
+  }
+})
 
 // get element with id name
 var nameBtn = document.getElementById('select-name');
 // function to create a hash of a string
-hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+hashCode = s => s.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)
 
 // add an event listener to the button
-nameBtn.addEventListener('click', function() {
-    // Read the value of the input field with id=name
-    var username = document.getElementById('name').value;
+nameBtn.addEventListener('click', function () {
+  // Read the value of the input field with id=name
+  var username = document.getElementById('name').value;
+  // prevent XSS
+  username
+  if (username != "") {
     // store the name in local storage
     localStorage.setItem('name', username);
     // request a session id
     var gameID = document.getElementById('gameid').value;
-    socket.send("register|"+gameID)
+    socket.send("register|" + gameID)
+  } else {
+    alert("Bitte gib einen Namen ein")
+  }
+
+  // submit the form on enter press
+
 
 })

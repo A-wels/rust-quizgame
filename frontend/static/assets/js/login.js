@@ -27,3 +27,9 @@ document.getElementById("btn-login").addEventListener("click", function () {
   var password = document.getElementById("password").value;
   socket.send("login|" + password);
 });
+
+window.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    document.getElementById("btn-login").click();
+  }
+})
